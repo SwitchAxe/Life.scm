@@ -46,10 +46,10 @@
             ((= ci mi) (newline))
             ((zero? (modulo ci (/ mi (sqrt mi))))
                 (newline)
-                (display (if (equal? (list-ref grid ci) #t) #\o #\space))
+                (display (if (equal? (list-ref grid ci) #t) #\o #\-))
                 (draw-grid-aux grid (+ ci 1) mi))
             (else
-                (display (if (equal? (list-ref grid ci) #t) #\o #\space))
+                (display (if (equal? (list-ref grid ci) #t) #\o #\-))
                 (draw-grid-aux grid (+ ci 1) mi))))
 
 (define (draw-grid grid)
@@ -86,15 +86,14 @@
                 (life-aux (- generations 1) (update-grid og ng) ng 0))
             (else
                 (let ((adj-cnt (count-neighbors og ci)))
-                    (if (or (= adj-cnt 2) (= adj-cnt 3))
-                        (life-aux generations og (change-elem ng ci #t) (+ ci 1))
-                        (life-aux generations og (change-elem ng ci #f) (+ ci 1))))))))
+                    (cond
+                        ((and (equal? (grid-ref og ci) #f) (= adj-cnt 3))
+                            (life-aux generations og (change-elem ng ci #t) (+ ci 1)))
+                        ((and (equal? (grid-ref og ci) #t) (or (= adj-cnt 2) (= adj-cnt 3)))
+                            (life-aux generations og (change-elem ng ci #t) (+ ci 1)))
+                        (else
+                            (life-aux generations og (change-elem ng ci #f) (+ ci 1)))))))))
 
 
 (define (life generations grid)
-    (life-aux
-        generations
-        grid
-        (make-list (length grid) #\space)
-        0))
-
+    (life-aux generations grid (make-list (length grid) #\space) 0))
